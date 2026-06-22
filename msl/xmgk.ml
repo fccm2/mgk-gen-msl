@@ -8,6 +8,8 @@ let () =
 
   let id = (fun v -> v) in
 
+  let filter_list = ["blur"; "edge"; "negate"; "charcoal"; "modulate"; "emboss"; "shade"] in
+
   let param_default_get conv_f param_name default_value xml_attrs =
     try let str_param = List.assoc param_name xml_attrs in conv_f str_param
     with Not_found | Failure _ -> default_value
@@ -15,11 +17,52 @@ let () =
 
   let apply_filter primitive tag =
     match tag with
+    | Xmlerr.Tag ("modulate", xml_attrs) ->
+        let brightness = param_default_get int_of_string "brightness" 100 xml_attrs in
+        let saturation = param_default_get int_of_string "saturation" 100 xml_attrs in
+        let hue        = param_default_get int_of_string "hue"        100 xml_attrs in
+        begin match primitive with
+        | Some image -> HMagick.image_modulate image ~modulate:(brightness, saturation, hue);
+        | None -> ()
+        end;
+        primitive
+
+    | Xmlerr.Tag ("charcoal", xml_attrs) ->
+        let radius = param_default_get float_of_string "radius" 1.0 xml_attrs in
+        let sigma = param_default_get float_of_string "sigma" 1.0 xml_attrs in
+        let image =
+          match primitive with
+          | Some img -> Some (HMagick.image_charcoal img ~radius ~sigma)
+          | None -> (None)
+        in
+        image
+
     | Xmlerr.Tag ("edge", xml_attrs) ->
         let radius = param_default_get float_of_string "radius" 1.0 xml_attrs in
         let image =
           match primitive with
           | Some img -> Some (HMagick.image_edge img ~radius)
+          | None -> None
+        in
+        image
+
+    | Xmlerr.Tag ("shade", xml_attrs) ->
+        let gray = param_default_get bool_of_string "gray" true xml_attrs in
+        let azimuth = param_default_get float_of_string "azimuth" 1.0 xml_attrs in
+        let elevation = param_default_get float_of_string "elevation" 1.0 xml_attrs in
+        let image =
+          match primitive with
+          | Some img -> Some (HMagick.image_shade img ~gray ~azimuth ~elevation)
+          | None -> None
+        in
+        image
+
+    | Xmlerr.Tag ("emboss", xml_attrs) ->
+        let radius = param_default_get float_of_string "radius" 1.0 xml_attrs in
+        let sigma = param_default_get float_of_string "sigma" 1.0 xml_attrs in
+        let image =
+          match primitive with
+          | Some img -> Some (HMagick.image_emboss img ~radius ~sigma)
           | None -> None
         in
         image
@@ -33,6 +76,13 @@ let () =
           | None -> None
         in
         image
+
+    | Xmlerr.Tag ("negate", xml_attrs) ->
+        begin match primitive with
+        | Some image -> HMagick.image_negate image;
+        | None -> ()
+        end;
+        primitive
 
     | _ -> primitive
   in
@@ -63,7 +113,7 @@ let () =
         aux_merge None (Some compose) layers msl_image
 
     | ((Xmlerr.Tag (filter_name, _)) as tag)::msl_image
-      when List.mem filter_name ["blur"; "edge"] ->
+      when List.mem filter_name filter_list ->
         Printf.printf "# layer-filter: %s\n%!" filter_name;
         let prim = apply_filter prim tag in
         aux_merge prim compose layers msl_image
@@ -71,7 +121,6 @@ let () =
     | (Xmlerr.Tag (filter_name, _))::msl_image ->
         Printf.printf "# layer-filter: %s (un-match-ed)\n%!" filter_name;
         aux_merge prim compose layers msl_image
-
 
     | (Xmlerr.ETag ("merge"))::msl_image ->
         Printf.printf "# merge-end\n%!";
@@ -124,22 +173,9 @@ let () =
         end;
         aux_image primitive xt
 
-    | ((Xmlerr.Tag ("edge", xml_attrs)) as tag)::xt ->
+    | ((Xmlerr.Tag (filter_name, xml_attrs)) as tag)::xt
+      when List.mem filter_name filter_list ->
         let image = apply_filter primitive tag in
-        aux_image image xt
-
-    | ((Xmlerr.Tag ("blur", xml_attrs)) as tag)::xt ->
-        let image = apply_filter primitive tag in
-        aux_image image xt
-
-    | (Xmlerr.Tag ("charcoal", xml_attrs))::xt ->
-        let radius = param_default_get float_of_string "radius" 1.0 xml_attrs in
-        let sigma = param_default_get float_of_string "sigma" 1.0 xml_attrs in
-        let image =
-          match primitive with
-          | Some img -> Some (HMagick.image_charcoal img ~radius ~sigma)
-          | None -> (None)
-        in
         aux_image image xt
 
     | (Xmlerr.Tag ("display", []))::xt ->
