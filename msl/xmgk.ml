@@ -198,6 +198,15 @@ let () =
   let rec aux_image primitive xt =
     Printf.printf "# entering-image\n%!";
     match xt with
+    | (Xmlerr.Tag ("new", [("w", w); ("h", h);]))::xt ->
+
+        let color = (65535, 65535, 65535, 65535) in
+        Printf.printf "# image-new\n%!";
+        let w = int_of_string w in
+        let h = int_of_string h in
+        let image = HMagick.new_image w h color in
+        aux_image (Some image) xt
+
     | (Xmlerr.Tag ("read", [("filename", filename)]))::xt ->
         Printf.printf "# image-read\n%!";
         let image = HMagick.image_read filename in

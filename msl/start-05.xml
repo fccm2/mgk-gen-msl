@@ -1,0 +1,6 @@
+<msl>
+  <image>
+    <new w='400' h='300' />
+    <write filename='blank.png' />
+  </image>
+</msl>
