@@ -278,16 +278,15 @@ let () =
     Printf.printf "# entering-image\n%!";
     match xt with
     | (Xmlerr.Tag ("new", [("w", w); ("h", h);]))::xt ->
-
         let color = (65535, 65535, 65535, 65535) in
-        Printf.printf "# image-new\n%!";
         let w = int_of_string w in
         let h = int_of_string h in
+        Printf.printf "# image-new: [%d %d]\n%!" w h;
         let image = HMagick.new_image w h color in
         aux_image (Some image) xt
 
     | (Xmlerr.Tag ("read", [("filename", filename)]))::xt ->
-        Printf.printf "# image-read\n%!";
+        Printf.printf "# image-read: '%s'\n%!" filename;
         let image = HMagick.image_read filename in
         aux_image (Some image) xt
 
@@ -298,6 +297,7 @@ let () =
 
     | (Xmlerr.Tag ("write", xml_attrs))::xt ->
         let filename = param_default_get id "filename" "" xml_attrs in
+        Printf.printf "# image-write: '%s'\n%!" filename;
         begin match primitive with
         | Some img -> HMagick.image_write img ~filename;
         | None -> ()
@@ -335,6 +335,8 @@ let () =
   let rec aux xt =
     match xt with
     | (Xmlerr.Tag ("msl", _))::msl_xml -> aux_msl msl_xml
+    | (Xmlerr.Tag ("?xml", _))::msl_xml -> aux msl_xml
+
     (*
     | _::msl_xml -> aux_msl msl_xml
     *)
