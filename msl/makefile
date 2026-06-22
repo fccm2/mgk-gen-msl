@@ -12,3 +12,6 @@ clean:
 	$(RM) rose-3.jpg
 	$(RM) rose-4.jpg
 	$(RM) rose.png
+	$(RM) line-01.png
+	$(RM) text-01.png
+	$(RM) circle-01.png

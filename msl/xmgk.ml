@@ -18,11 +18,16 @@ let () =
     Scanf.sscanf txt_d3 "%d,%d,%d" (fun r g b -> (r, g, b, 255))
   in
 
+  let d3_scanf_none txt_d3 =
+    Some (Scanf.sscanf txt_d3 "%d,%d,%d" (fun r g b -> (r, g, b, 255)))
+  in
+
   let default_some prm = Some prm in
   let default_some_float prm = Some(float_of_string prm) in
 
   let filter_list = ["blur"; "edge"; "negate"; "charcoal"; "modulate"; "emboss"; "shade";
-    "sharpen"; "spread"; "solarize"; "equalize"; "despeckle"; "draw_text"; "draw_line"] in
+    "sharpen"; "spread"; "solarize"; "equalize"; "despeckle";
+    "draw_text"; "draw_line"; "draw_circle"] in
 
   let param_default_get conv_f param_name default_value xml_attrs =
     try let str_param = List.assoc param_name xml_attrs in conv_f str_param
@@ -32,7 +37,59 @@ let () =
   let apply_filter primitive tag =
     match tag with
 
+    | Xmlerr.Tag ("draw_circle", xml_attrs) ->
+        let c = param_default_get p2_scanf "c" (0, 0) xml_attrs in
+        let r = param_default_get int_of_string "r" 1 xml_attrs in
+
+        let stroke_rgba = param_default_get d3_scanf_none "stroke_rgb" None xml_attrs in
+        let fill_rgba = param_default_get d3_scanf_none "fill_rgb" None xml_attrs in
+        let stroke_width = param_default_get default_some_float "stroke_width" None xml_attrs in
+
+        let x, y = c in
+        Printf.printf "# draw-circle: %d [%d %d]" r x y ;
+        begin match primitive with
+        | None -> ()
+        | Some image ->
+            begin match fill_rgba with
+            | Some rgba ->
+                let r_, g, b, _ = rgba in
+                Printf.printf " f:[%d %d %d]" r_ g b;
+                HMagick.fill_primitive image
+                     ~prim:(HMagick.Prim.prim_circle c r)
+                     ~fill:(HMagick.Color.map8 rgba) ();
+            | None -> ()
+            end;
+            begin match stroke_width, stroke_rgba with
+            | (None, None) -> ()
+            | (None), (Some rgba) ->
+                HMagick.stroke_primitive image
+                     ~prim:(HMagick.Prim.prim_circle c r)
+                     ~stroke:(HMagick.Color.map8 rgba)
+                     ~stroke_width:1.0 ();
+
+            | (Some stroke_width), (Some rgba) ->
+                let r_, g, b, _ = rgba in
+                Printf.printf " [%d %d %d]" r_ g b;
+                Printf.printf ", %g" stroke_width;
+                HMagick.stroke_primitive image
+                     ~prim:(HMagick.Prim.prim_circle c r)
+                     ~stroke:(HMagick.Color.map8 rgba)
+                     ~stroke_width:stroke_width ();
+
+            | (Some stroke_width), (None) ->
+                Printf.printf ", %g" stroke_width;
+                HMagick.stroke_primitive image
+                     ~prim:(HMagick.Prim.prim_circle c r)
+                     ~stroke:(HMagick.Color.map8 (0, 0, 0, 255))
+                     ~stroke_width:stroke_width ();
+            end;
+            Printf.printf "\n%!";
+        end;
+        primitive
+
+
     (*
+    val draw_circle : int * int -> int -> t
 
     val fill_primitive : Magick.image ->
        prim:Prim.t -> ?fill:Color.t -> unit -> unit

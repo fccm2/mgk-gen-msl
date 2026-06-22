@@ -733,6 +733,7 @@ module Magick = struct
     begin match stroke with None -> ()
     | Some c -> Magick.magick_draw_info_set_stroke d c
     end;
+    Magick.magick_draw_info_set_fill d (255,255,255,0);
     let e = Magick._magick_exception_info_acquire () in
     Magick.magick_draw_info_set_primitive d prim;
     Magick.magick_image_draw img d e;
