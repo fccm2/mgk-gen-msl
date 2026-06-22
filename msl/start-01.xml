@@ -1,0 +1,7 @@
+<msl>
+  <image>
+    <read filename='rose.png' />
+    <blur radius='10.0' sigma='12.0' />
+    <display />
+  </image>
+</msl>

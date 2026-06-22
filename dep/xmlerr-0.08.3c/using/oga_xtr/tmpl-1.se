@@ -1,0 +1,4 @@
+(elem
+  (link "@link@")
+  (label "@label@")
+)

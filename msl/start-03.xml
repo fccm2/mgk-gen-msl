@@ -1,0 +1,8 @@
+<msl>
+  <image>
+    <read filename='rose.png' />
+    <charcoal radius='2.0' sigma='1.4' />
+    <display />
+    <write filename='rose-3.jpg' />
+  </image>
+</msl>

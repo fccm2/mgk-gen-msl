@@ -1,0 +1,7 @@
+<msl>
+  <image>
+    <read filename='rose.png' />
+    <edge radius='2' />
+    <write filename='rose-2.jpg' />
+  </image>
+</msl>

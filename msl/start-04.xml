@@ -1,0 +1,15 @@
+<msl>
+  <image>
+    <merge>
+      <layer>
+        <read filename='rose.png' />
+        <blur radius='10.0' sigma='12.0' />
+      </layer>
+      <layer compose='multiply'>
+        <read filename='rose-2.jpg' />
+        <edge radius='2' />
+      </layer>
+    </merge>
+    <write filename='rose-4.jpg' />
+  </image>
+</msl>

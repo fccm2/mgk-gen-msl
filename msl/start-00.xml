@@ -1,0 +1,6 @@
+<msl>
+  <image>
+    <read filename='rose.png' />
+    <display />
+  </image>
+</msl>
