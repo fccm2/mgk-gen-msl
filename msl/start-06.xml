@@ -1,0 +1,7 @@
+<msl>
+  <image>
+    <new w='400' h='300' />
+    <draw_text txt="text" pointsize="26" pos="20 40" />
+    <write filename='text-01.png' />
+  </image>
+</msl>

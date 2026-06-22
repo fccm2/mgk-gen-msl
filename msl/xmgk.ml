@@ -7,9 +7,16 @@ let () =
   *)
 
   let id = (fun v -> v) in
+ 
+  let d2_scanf txt_d2 =
+    Scanf.sscanf txt_d2 "%d %d" (fun x y -> (x, y))
+  in
+
+  let default_some prm = Some prm in
+  let default_some_float prm = Some(float_of_string prm) in
 
   let filter_list = ["blur"; "edge"; "negate"; "charcoal"; "modulate"; "emboss"; "shade";
-    "sharpen"; "spread"; "solarize"; "equalize"; "despeckle"] in
+    "sharpen"; "spread"; "solarize"; "equalize"; "despeckle"; "draw_text"] in
 
   let param_default_get conv_f param_name default_value xml_attrs =
     try let str_param = List.assoc param_name xml_attrs in conv_f str_param
@@ -18,6 +25,39 @@ let () =
 
   let apply_filter primitive tag =
     match tag with
+    | Xmlerr.Tag ("draw_text", xml_attrs) ->
+        let text = param_default_get id "txt" "" xml_attrs in
+        let pos = param_default_get d2_scanf "pos" (0, 0) xml_attrs in
+        let font = param_default_get default_some "font" None xml_attrs in
+        let pointsize = param_default_get default_some_float "pointsize" None xml_attrs in
+        let _ = font in
+        (*
+        *)
+        (*
+          (Color.map8 (0, 0, 0, 255))
+        *)
+        begin match primitive with
+        | None -> ()
+        | Some image ->
+            HMagick.draw_text image
+              ~pos:pos
+              ~txt:text
+              (*
+              ?font:font
+              *)
+              ~font:"/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+              ?pointsize:pointsize
+              ~fill:(0, 0, 0, 65535)
+              (*
+              ?fill:Color.t
+              ?stroke:Color.t
+              ?stroke_width:float
+              *)
+              ()
+            ;
+        end;
+        primitive
+
     | Xmlerr.Tag ("modulate", xml_attrs) ->
         let brightness = param_default_get int_of_string "brightness" 100 xml_attrs in
         let saturation = param_default_get int_of_string "saturation" 100 xml_attrs in
