@@ -301,17 +301,46 @@ external magick_image_despeckle : image -> exception_info -> image
 external magick_image_charcoal : image -> radius:float -> sigma:float -> exception_info -> image
   = "caml_magick_image_charcoal"
 
-type noise_type =
-  | UndefinedNoise
-  | UniformNoise
-  | GaussianNoise
-  | MultiplicativeGaussianNoise
-  | ImpulseNoise
-  | LaplacianNoise
-  | PoissonNoise
-  | RandomNoise
+module Noise = struct
+type t =
+  | Undefined
+  | Uniform
+  | Gaussian
+  | MultiplicativeGaussian
+  | Impulse
+  | Laplacian
+  | Poisson
+  | Random
 
-external magick_image_add_noise : image -> noise:noise_type -> attenuate:float -> exception_info -> image
+let to_string = function
+  | Undefined                 -> "Undefined"
+  | Uniform                   -> "Uniform"
+  | Gaussian                  -> "Gaussian"
+  | MultiplicativeGaussian    -> "MultiplicativeGaussian"
+  | Impulse                   -> "Impulse"
+  | Laplacian                 -> "Laplacian"
+  | Poisson                   -> "Poisson"
+  | Random                    -> "Random"
+
+let of_string noise_t =
+  match String.lowercase_ascii noise_t with
+  | "uniform"                 -> Uniform
+  | "gaussian"                -> Gaussian
+  | "impulse"                 -> Impulse
+  | "laplacian"               -> Laplacian
+  | "poisson"                 -> Poisson
+  | "random"                  -> Random
+
+  | "multiplicative-gaussian"
+  | "multiplicative_gaussian"
+  | "multiplicativegaussian"  -> MultiplicativeGaussian
+
+  | "undefined"
+  | _                         -> Undefined
+
+end
+
+external magick_image_add_noise : image -> noise:Noise.t -> attenuate:float -> exception_info -> image
   = "caml_magick_image_add_noise"
 
 external magick_image_solarize : image -> threshold:float -> exception_info -> unit

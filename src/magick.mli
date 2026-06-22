@@ -111,17 +111,19 @@ val magick_image_despeckle :
 val magick_image_charcoal :
   image -> radius:float -> sigma:float -> exception_info -> image
 
-type noise_type =
-  | UndefinedNoise
-  | UniformNoise
-  | GaussianNoise
-  | MultiplicativeGaussianNoise
-  | ImpulseNoise
-  | LaplacianNoise
-  | PoissonNoise
-  | RandomNoise
+module Noise : sig
+type t =
+  | Undefined
+  | Uniform
+  | Gaussian
+  | MultiplicativeGaussian
+  | Impulse
+  | Laplacian
+  | Poisson
+  | Random
+end
 
-val magick_image_add_noise : image -> noise:noise_type -> attenuate:float -> exception_info -> image
+val magick_image_add_noise : image -> noise:Noise.t -> attenuate:float -> exception_info -> image
 
 val magick_image_solarize : image -> threshold:float -> exception_info -> unit
 
@@ -243,7 +245,7 @@ module Magick : sig
   val image_negate : image -> unit
   val image_equalize : image -> unit
   val image_solarize : image -> threshold:float -> unit
-  val image_add_noise : image -> noise_type -> float -> image
+  val image_add_noise : image -> Noise.t -> float -> image
 
   module Color: sig
     type t = color
