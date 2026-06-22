@@ -9,3 +9,4 @@ Generic.ttf:
 	cp ImageMagick-7.1.1-47/PerlMagick/t/Generic.ttf ./
 clean:
 	$(RM) 7.1.1-47.tar.gz
+	$(RM) Generic.ttf
