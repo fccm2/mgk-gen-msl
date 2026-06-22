@@ -8,7 +8,8 @@ let () =
 
   let id = (fun v -> v) in
 
-  let filter_list = ["blur"; "edge"; "negate"; "charcoal"; "modulate"; "emboss"; "shade"] in
+  let filter_list = ["blur"; "edge"; "negate"; "charcoal"; "modulate"; "emboss"; "shade";
+    "sharpen"; "spread"; "solarize"; "equalize"; "despeckle"] in
 
   let param_default_get conv_f param_name default_value xml_attrs =
     try let str_param = List.assoc param_name xml_attrs in conv_f str_param
@@ -63,6 +64,48 @@ let () =
         let image =
           match primitive with
           | Some img -> Some (HMagick.image_emboss img ~radius ~sigma)
+          | None -> None
+        in
+        image
+
+    | Xmlerr.Tag ("sharpen", xml_attrs) ->
+        let radius = param_default_get float_of_string "radius" 1.0 xml_attrs in
+        let sigma = param_default_get float_of_string "sigma" 1.0 xml_attrs in
+        let image =
+          match primitive with
+          | Some img -> Some (HMagick.image_sharpen img ~radius ~sigma)
+          | None -> None
+        in
+        image
+
+    | Xmlerr.Tag ("spread", xml_attrs) ->
+        let radius = param_default_get float_of_string "radius" 1.0 xml_attrs in
+        let image =
+          match primitive with
+          | Some image -> Some (HMagick.image_spread image ~meth:Magick.Average ~radius)
+          | None -> None
+        in
+        image
+
+    | Xmlerr.Tag ("solarize", xml_attrs) ->
+        let threshold = param_default_get float_of_string "threshold" 1.0 xml_attrs in
+        begin match primitive with
+        | Some image -> HMagick.image_solarize image ~threshold;
+        | None -> ()
+        end;
+        primitive
+
+    | Xmlerr.Tag ("equalize", xml_attrs) ->
+        begin match primitive with
+        | Some image -> HMagick.image_equalize image;
+        | None -> ()
+        end;
+        primitive
+
+    | Xmlerr.Tag ("despeckle", xml_attrs) ->
+        let image =
+          match primitive with
+          | Some image -> Some (HMagick.image_despeckle image)
           | None -> None
         in
         image
