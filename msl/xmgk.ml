@@ -8,15 +8,21 @@ let () =
 
   let id = (fun v -> v) in
  
+  let p2_scanf txt_d2 =
+    Scanf.sscanf txt_d2 "%d,%d" (fun x y -> (x, y))
+  in
   let d2_scanf txt_d2 =
     Scanf.sscanf txt_d2 "%d %d" (fun x y -> (x, y))
+  in
+  let d3_scanf txt_d3 =
+    Scanf.sscanf txt_d3 "%d,%d,%d" (fun r g b -> (r, g, b, 255))
   in
 
   let default_some prm = Some prm in
   let default_some_float prm = Some(float_of_string prm) in
 
   let filter_list = ["blur"; "edge"; "negate"; "charcoal"; "modulate"; "emboss"; "shade";
-    "sharpen"; "spread"; "solarize"; "equalize"; "despeckle"; "draw_text"] in
+    "sharpen"; "spread"; "solarize"; "equalize"; "despeckle"; "draw_text"; "draw_line"] in
 
   let param_default_get conv_f param_name default_value xml_attrs =
     try let str_param = List.assoc param_name xml_attrs in conv_f str_param
@@ -25,13 +31,46 @@ let () =
 
   let apply_filter primitive tag =
     match tag with
+
+    (*
+
+    val fill_primitive : Magick.image ->
+       prim:Prim.t -> ?fill:Color.t -> unit -> unit
+
+    val stroke_primitive : Magick.image ->
+       prim:Prim.t ->
+       ?stroke:Color.t -> ?stroke_width:float -> unit -> unit
+
+    *)
+
+    | Xmlerr.Tag ("draw_line", xml_attrs) ->
+        let p0 = param_default_get p2_scanf "p1" ( 0, 10) xml_attrs in
+        let p1 = param_default_get p2_scanf "p2" (10, 10) xml_attrs in
+        let rgba = param_default_get d3_scanf "rgb" (0, 0, 0, 255) xml_attrs in
+        let stroke_width = param_default_get float_of_string "stroke_width" 1.0 xml_attrs in
+        let r, g, b, _ = rgba in
+        Printf.printf "# draw-line: [%d %d %d], %g\n%!" r g b stroke_width;
+        begin match primitive with
+        | None -> ()
+        | Some image ->
+            HMagick.stroke_primitive image
+                 ~prim:(HMagick.Prim.prim_line p0 p1)
+                 ~stroke:(HMagick.Color.map8 rgba)
+                 ~stroke_width:stroke_width ();
+        end;
+        primitive
+
+
     | Xmlerr.Tag ("draw_text", xml_attrs) ->
         let text = param_default_get id "txt" "" xml_attrs in
         let pos = param_default_get d2_scanf "pos" (0, 0) xml_attrs in
         let font = param_default_get default_some "font" None xml_attrs in
         let pointsize = param_default_get default_some_float "pointsize" None xml_attrs in
+        let rgba = param_default_get d3_scanf "rgb" (0, 0, 0, 255) xml_attrs in
         let _ = font in
         (*
+          ../ext/Generic.ttf
+
         *)
         (*
           (Color.map8 (0, 0, 0, 255))
@@ -39,15 +78,15 @@ let () =
         begin match primitive with
         | None -> ()
         | Some image ->
+            (*
+              ~font:"/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+            *)
             HMagick.draw_text image
               ~pos:pos
               ~txt:text
-              (*
               ?font:font
-              *)
-              ~font:"/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
               ?pointsize:pointsize
-              ~fill:(0, 0, 0, 65535)
+              ~fill:(HMagick.Color.map8 rgba)
               (*
               ?fill:Color.t
               ?stroke:Color.t

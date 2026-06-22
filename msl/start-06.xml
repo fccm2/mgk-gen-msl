@@ -5,3 +5,10 @@
     <write filename='text-01.png' />
   </image>
 </msl>
+<!--
+      font="/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+      font="./Generic.ttf"
+-->
+<!--
+      -'Generic.ttf' from '../ext/'
+-->
