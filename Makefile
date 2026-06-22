@@ -1,7 +1,7 @@
 all:
 	$(MAKE) -C src
 test:
-	$(MAKE) -C test
+	$(MAKE) -C test test
 clean:
 	$(MAKE) -C src clean
 man:

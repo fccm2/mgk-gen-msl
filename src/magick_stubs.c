@@ -5,7 +5,7 @@
  */
 
 /* In order to compile w/ a previous (MAGICK_LIB_VERSION == 6)
- * Please take a earlier version of the bindings,
+ * Please take an earlier version of the interface,
  */
 
 /* This version of the interface is made to compile with a
@@ -14,6 +14,8 @@
 
 /* IM-7 */
 #include <MagickCore/MagickCore.h>
+
+#define CAML_NAME_SPACE
 
 #include <caml/mlvalues.h>
 #include <caml/alloc.h>
@@ -811,6 +813,9 @@ static const NoiseType noise_type_table[] = {
   RandomNoise
 };
 
+#define Noise_type_val(nt) \
+  noise_type_table[Long_val(nt)]
+
 CAMLprim value
 caml_magick_image_add_noise(
     value caml_image,
@@ -949,6 +954,9 @@ static const PixelInterpolateMethod pixel_interpolate_method_table[] = {
   NearestInterpolatePixel,
   SplineInterpolatePixel
 };
+
+#define Pixel_interpolate_method_val(pi) \
+  pixel_interpolate_method_table[Long_val(pi)]
 
 /* SpreadImage() */
 

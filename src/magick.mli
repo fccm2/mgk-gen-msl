@@ -185,14 +185,14 @@ val magick_draw_info_set_stroke_width: draw_info -> float -> unit
 val magick_draw_info_set_primitive: draw_info -> string -> unit
 (**
   {ul
-    {- line x1,y1 x2,y2 }
-    {- point x,y }
-    {- rectangle x1,y1 x2,y2 }
-    {- circle cx,cy x,y }
-    {- ellipse cx,cy rx,ry 0,360 }
-    {- path 'M x1,y1 Q x2,y2 x3,y3' }
-    {- path 'M x1,y1 C x2,y2 x3,y3 x4,y4' }
-    {- polygon \[x,y\]+ }
+    {- [line x1,y1 x2,y2] }
+    {- [point x,y] }
+    {- [rectangle x1,y1 x2,y2] }
+    {- [circle cx,cy x,yr] }
+    {- [ellipse cx,cy rx,ry 0,360] }
+    {- [path 'M x1,y1 Q x2,y2 x3,y3'] }
+    {- [path 'M x1,y1 C x2,y2 x3,y3 x4,y4'] }
+    {- [polygon \[x,y\]+] }
   }
 *)
 
@@ -247,27 +247,27 @@ module Magick : sig
 
   module Color: sig
     type t = color
-    (** (r, g, b, a) *)
+    (** [(r, g, b, a)] *)
 
     val map8 : t -> t
-    (** maps entry colors with Q8 values,
-        for use with the current compiled quatum *)
+    (** maps entry colors with [Q8] values,
+        for use with the current [compiled] quatum, *)
   end
 
   (* primitives *)
 
   module Prim: sig
     type t
-    val draw_point: int * int -> t
-    val draw_line: int * int -> int * int -> t
-    val draw_rectangle: int * int -> int * int -> t
-    val draw_circle: int * int -> int -> t
-    val draw_ellipse: int * int -> int * int -> t
-    val draw_qbcurve: int * int -> int * int -> int * int -> t
-    val draw_cbcurve: int * int -> int * int -> int * int -> int * int -> t
-    val draw_round_rectangle: int * int -> int * int -> int * int -> t
-    val draw_polygon: (int * int) list -> t
-    val draw_text: int * int -> string -> string
+    val prim_point: int * int -> t
+    val prim_line: int * int -> int * int -> t
+    val prim_rectangle: int * int -> int * int -> t
+    val prim_circle: int * int -> int -> t
+    val prim_ellipse: int * int -> int * int -> t
+    val prim_qbcurve: int * int -> int * int -> int * int -> t
+    val prim_cbcurve: int * int -> int * int -> int * int -> int * int -> t
+    val prim_round_rectangle: int * int -> int * int -> int * int -> t
+    val prim_polygon: (int * int) list -> t
+    val prim_text: int * int -> string -> string
   end
 
   val fill_primitive: image -> prim:Prim.t ->
@@ -277,7 +277,7 @@ module Magick : sig
     ?stroke:Color.t ->
     ?stroke_width:float -> unit -> unit
 
-  val draw_text: image -> pos:int * int -> s:string ->
+  val draw_text: image -> pos:int * int -> txt:string ->
     ?font:string -> ?pointsize:float ->
     ?fill:Color.t ->
     ?stroke:Color.t ->

@@ -648,55 +648,55 @@ module Magick = struct
   module Prim = struct
     type t = string
 
-    let draw_line (x1, y1) (x2, y2) =
+    let prim_line (x1, y1) (x2, y2) =
       (Printf.sprintf "line %d,%d %d,%d" x1 y1 x2 y2)
 
-    let draw_point (x, y) =
+    let prim_point (x, y) =
       (Printf.sprintf "point %d,%d" x y)
 
-    let draw_rectangle (x, y) (w, h) =
+    let prim_rectangle (x, y) (w, h) =
       (Printf.sprintf "rectangle %d,%d %d,%d" x y (x + w) (y + h))
 
-    let draw_circle (cx, cy) (r) =
+    let prim_circle (cx, cy) (r) =
       (Printf.sprintf "circle %d,%d %d,%d" cx cy cx (cy + r))
 
-    let draw_ellipse (cx, cy) (rx, ry) =
+    let prim_ellipse (cx, cy) (rx, ry) =
       (Printf.sprintf "ellipse %d,%d %d,%d 0,360" cx cy rx ry)
 
-    let draw_qbcurve (x1, y1) (x2, y2) (x3, y3) =
+    let prim_qbcurve (x1, y1) (x2, y2) (x3, y3) =
       (Printf.sprintf "path 'M %d,%d Q %d,%d %d,%d'" x1 y1 x2 y2 x3 y3)
 
-    let draw_cbcurve (x1, y1) (x2, y2) (x3, y3) (x4, y4) =
+    let prim_cbcurve (x1, y1) (x2, y2) (x3, y3) (x4, y4) =
       (Printf.sprintf "path 'M %d,%d C %d,%d %d,%d %d,%d'" x1 y1 x2 y2 x3 y3 x4 y4)
 
-    let draw_polygon ps =
+    let prim_polygon ps =
       let ps = List.map (fun (x, y) -> Printf.sprintf "%d,%d" x y) ps in
       (Printf.sprintf "polygon %s" (String.concat " " ps))
 
-    let draw_round_rectangle (x, y) (w, h) (r1, r2) =
+    let prim_round_rectangle (x, y) (w, h) (r1, r2) =
       (Printf.sprintf "roundrectangle %d,%d %d,%d %d,%d" x y (x + w) (y + h) r1 r2)
 
-    let draw_arc (cx, cy) (rx, ry) (a1, a2) =
+    let prim_arc (cx, cy) (rx, ry) (a1, a2) =
       (Printf.sprintf "ellipse %d,%d %d,%d %d,%d" cx cy rx ry a1 a2)
 
-    let draw_text (x, y) s =
+    let prim_text (x, y) s =
       (Printf.sprintf "text %d,%d '%s'" x y s)
   end
 
 
-  let fill_primitive img ~prim:p ?fill () =
+  let fill_primitive img ~prim:prim ?fill () =
     let d = Magick.magick_draw_info_acquire () in
     begin match fill with None -> ()
     | Some c -> Magick.magick_draw_info_set_fill d c
     end;
     let e = Magick._magick_exception_info_acquire () in
-    Magick.magick_draw_info_set_primitive d p;
+    Magick.magick_draw_info_set_primitive d prim;
     Magick.magick_image_draw img d e;
     Magick.magick_draw_info_destroy d;
     Magick._magick_exception_info_destroy e;
     ()
 
-  let stroke_primitive img ~prim:p ?stroke ?stroke_width () =
+  let stroke_primitive img ~prim:prim ?stroke ?stroke_width () =
     let d = Magick.magick_draw_info_acquire () in
     begin match stroke_width with None -> ()
     | Some v -> Magick.magick_draw_info_set_stroke_width d v
@@ -705,13 +705,13 @@ module Magick = struct
     | Some c -> Magick.magick_draw_info_set_stroke d c
     end;
     let e = Magick._magick_exception_info_acquire () in
-    Magick.magick_draw_info_set_primitive d p;
+    Magick.magick_draw_info_set_primitive d prim;
     Magick.magick_image_draw img d e;
     Magick.magick_draw_info_destroy d;
     Magick._magick_exception_info_destroy e;
     ()
 
-  let draw_text img ~pos ~s ?font ?pointsize ?fill ?stroke ?stroke_width () =
+  let draw_text img ~pos ~txt ?font ?pointsize ?fill ?stroke ?stroke_width () =
     let d = Magick.magick_draw_info_acquire () in
     begin match fill with None -> ()
     | Some c -> Magick.magick_draw_info_set_fill d c
@@ -726,10 +726,10 @@ module Magick = struct
     | Some f -> Magick.magick_draw_info_set_font d f
     end;
     begin match pointsize with None -> ()
-    | Some p -> Magick.magick_draw_info_set_pointsize d p
+    | Some s -> Magick.magick_draw_info_set_pointsize d s
     end;
     let e = Magick._magick_exception_info_acquire () in
-    Magick.magick_draw_info_set_primitive d (Prim.draw_text pos s);
+    Magick.magick_draw_info_set_primitive d (Prim.prim_text pos txt);
     Magick.magick_image_draw img d e;
     Magick.magick_draw_info_destroy d;
     Magick._magick_exception_info_destroy e;
